@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+
+  zookeeper:
+    hostname: zookeeper
+    build: .
+    image: carloshkayser/apache-kafka:2.3.0
+    restart: always
+    ports:
+      - 2181:2181
+    command: /usr/lib/kafka/bin/zookeeper-server-start.sh /usr/lib/kafka/config/zookeeper.properties
+    networks:
+      - kafka-compose-network
+
+  kafka-broker:
+    hostname: kafka-broker
+    build: .
+    image: carloshkayser/apache-kafka:2.3.0
+    restart: always
+    ports:
+      - 9092:9092
+    command: bash -c "sleep 5 && /usr/lib/kafka/bin/kafka-server-start.sh /usr/lib/kafka/config/server.properties"
+    environment: 
+      - "BROKER_ID=1"
+      - "LISTENER_HOST=kafka-broker"
+    depends_on: 
+      - zookeeper
+    networks:
+      - kafka-compose-network
+
+networks:
+
+  kafka-compose-network:
+    driver: bridge
